@@ -10,7 +10,7 @@ class Envcli < Formula
       strategy :github_latest
     end
   
-    depends_on "node"
+    depends_on "node@18"
   
     def install
       # Extract the package contents
@@ -41,7 +41,7 @@ class Envcli < Formula
         #!/bin/bash
         export NODE_PATH="#{libexec}/node_modules"
         export ENVCLI_CONFIG_DIR="#{var}/envcli"
-        exec "#{Formula["node"].opt_bin}/node" "#{libexec}/index.js" "$@"
+        exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/index.js" "$@"
       EOS
       
       # Make the bin stub executable
