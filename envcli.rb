@@ -10,8 +10,6 @@ class Envcli < Formula
       strategy :github_latest
     end
   
-    depends_on :node => :recommended unless system("which node >/dev/null 2>&1")
-  
     def install
       if system("which node >/dev/null 2>&1")
         ohai "Using existing Node.js installation: #{Utils.popen_read("node -v").strip}"
