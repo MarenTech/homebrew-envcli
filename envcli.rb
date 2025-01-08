@@ -5,17 +5,17 @@ class Envcli < Formula
     sha256 "8656ac09e094ba446bf1252f81b1c3814a72d840842cdfd56d2b493dd0282d2f"
     license "ISC"
   
+    depends_on "node"
+  
     livecheck do
       url :stable
       strategy :github_latest
     end
   
     def install
-      if system("which node >/dev/null 2>&1")
-        ohai "Using existing Node.js installation: #{Utils.popen_read("node -v").strip}"
-      else
-        opoo "No Node.js installation found. Installing via Homebrew..."
-        depends_on "node"
+      node_version = Utils.popen_read("node -v").strip rescue nil
+      if node_version
+        ohai "Using existing Node.js installation: #{node_version}"
       end
       
       # Extract the package contents
