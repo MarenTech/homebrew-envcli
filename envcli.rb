@@ -11,14 +11,6 @@ class Envcli < Formula
     end
   
     def install
-      # Check for Node.js installation
-      unless system("which node >/dev/null 2>&1")
-        odie "Node.js is required but not installed. Please install Node.js first."
-      end
-
-      node_version = Utils.popen_read("node -v").strip
-      ohai "Using Node.js installation: #{node_version}"
-      
       # Extract the package contents
       system "tar", "xf", cached_download, "-C", buildpath
       
@@ -45,13 +37,24 @@ class Envcli < Formula
       # Create bin stubs with environment variables
       (bin/"envcli").write <<~EOS
         #!/bin/bash
+        if ! command -v node >/dev/null 2>&1; then
+          echo "Error: Node.js is required but not installed. Please install Node.js first."
+          exit 1
+        fi
         export NODE_PATH="#{libexec}/node_modules"
         export ENVCLI_CONFIG_DIR="#{var}/envcli"
-        exec "#{Formula["node"].opt_bin}/node" "#{libexec}/index.js" "$@"
+        exec "$(command -v node)" "#{libexec}/index.js" "$@"
       EOS
       
       # Make the bin stub executable
       chmod 0755, bin/"envcli"
+    end
+  
+    def caveats
+      <<~EOS
+        envcli requires Node.js to be installed.
+        If you haven't installed Node.js yet, please install it first.
+      EOS
     end
   
     def post_install
