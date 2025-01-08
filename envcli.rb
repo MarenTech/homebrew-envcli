@@ -5,18 +5,19 @@ class Envcli < Formula
     sha256 "8656ac09e094ba446bf1252f81b1c3814a72d840842cdfd56d2b493dd0282d2f"
     license "ISC"
   
-    depends_on "node"
-  
     livecheck do
       url :stable
       strategy :github_latest
     end
   
     def install
-      node_version = Utils.popen_read("node -v").strip rescue nil
-      if node_version
-        ohai "Using existing Node.js installation: #{node_version}"
+      # Check for Node.js installation
+      unless system("which node >/dev/null 2>&1")
+        odie "Node.js is required but not installed. Please install Node.js first."
       end
+
+      node_version = Utils.popen_read("node -v").strip
+      ohai "Using Node.js installation: #{node_version}"
       
       # Extract the package contents
       system "tar", "xf", cached_download, "-C", buildpath
