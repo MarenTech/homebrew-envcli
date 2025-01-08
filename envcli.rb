@@ -14,18 +14,29 @@ class Envcli < Formula
       # Extract the package contents
       system "tar", "xf", cached_download, "-C", buildpath
       
-      # Create package.json if it doesn't exist
-      system "npm", "init", "-y" unless File.exist? "package.json"
+      # Create a temporary package.json
+      (buildpath/"package.json").write <<~EOS
+        {
+          "name": "envcli",
+          "version": "#{version}",
+          "dependencies": {
+            "commander": "12.1.0",
+            "chalk": "4.1.2",
+            "figlet": "1.8.0",
+            "inquirer": "9.2.12",
+            "node-fetch": "3.3.2"
+          }
+        }
+      EOS
       
-      # Install all dependencies
-      system "npm", "install", "commander@12.1.0"
-      system "npm", "install", "chalk@4.1.2"
-      system "npm", "install", "figlet@1.8.0"
-      system "npm", "install", "inquirer@9.2.12"
-      system "npm", "install", "node-fetch@3.3.2"
+      # Use the full path to npm
+      npm = which("npm") || "/usr/local/bin/npm"
+      if !npm.exist?
+        odie "npm is required but not found. Please install Node.js first."
+      end
       
-      # Install all dependencies from package.json if it exists
-      system "npm", "install", "--production" if File.exist? "package.json"
+      # Install dependencies using the full npm path
+      system npm, "install", "--production"
       
       # Move package contents to libexec
       libexec.install Dir["*"]
@@ -46,7 +57,6 @@ class Envcli < Formula
         exec "$(command -v node)" "#{libexec}/index.js" "$@"
       EOS
       
-      # Make the bin stub executable
       chmod 0755, bin/"envcli"
     end
   
@@ -58,7 +68,6 @@ class Envcli < Formula
     end
   
     def post_install
-      # Ensure config directory has correct permissions
       (var/"envcli").mkpath
       chmod 0755, var/"envcli"
     end
