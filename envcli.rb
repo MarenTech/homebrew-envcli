@@ -14,21 +14,6 @@ class Envcli < Formula
       # Extract the package contents
       system "tar", "xf", cached_download, "-C", buildpath
       
-      # Create a temporary package.json
-      (buildpath/"package.json").write <<~EOS
-        {
-          "name": "envcli",
-          "version": "#{version}",
-          "dependencies": {
-            "commander": "12.1.0",
-            "chalk": "4.1.2",
-            "figlet": "1.8.0",
-            "inquirer": "9.2.12",
-            "node-fetch": "3.3.2"
-          }
-        }
-      EOS
-      
       # Use the full path to npm
       npm = which("npm") || "/usr/local/bin/npm"
       if !npm.exist?
