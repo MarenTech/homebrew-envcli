@@ -10,40 +10,41 @@ class Envcli < Formula
     strategy :github_latest
   end
 
-  depends_on "node"
-
   def install
     # Extract the package contents
     system "tar", "xf", cached_download, "-C", buildpath
+
+    # Use the system's Node.js to install dependencies
+    ENV.prepend_path "PATH", "/usr/local/bin" # Adjust if Node.js is in a different location
     
     # Create package.json if it doesn't exist
     system "npm", "init", "-y" unless File.exist? "package.json"
     
-    # Install all dependencies
+    # Install dependencies
     system "npm", "install", "commander@12.1.0"
     system "npm", "install", "chalk@4.1.2"
     system "npm", "install", "figlet@1.8.0"
     system "npm", "install", "inquirer@9.2.12"
     system "npm", "install", "node-fetch@3.3.2"
-    
+
     # Install all dependencies from package.json if it exists
     system "npm", "install", "--production" if File.exist? "package.json"
-    
+
     # Move package contents to libexec
     libexec.install Dir["*"]
     libexec.install Dir["node_modules"]
-    
+
     # Ensure config directory exists
     (var/"envcli").mkpath
-    
-    # Create bin stubs with environment variables
+
+    # Create bin stub with environment variables
     (bin/"envcli").write <<~EOS
       #!/bin/bash
       export NODE_PATH="#{libexec}/node_modules"
       export ENVCLI_CONFIG_DIR="#{var}/envcli"
-      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/index.js" "$@"
+      exec "node" "#{libexec}/index.js" "$@"
     EOS
-    
+
     # Make the bin stub executable
     chmod 0755, bin/"envcli"
   end
