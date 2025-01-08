@@ -10,9 +10,16 @@ class Envcli < Formula
       strategy :github_latest
     end
   
-    depends_on "node@18"
+    depends_on :node => :recommended unless system("which node >/dev/null 2>&1")
   
     def install
+      if system("which node >/dev/null 2>&1")
+        ohai "Using existing Node.js installation: #{Utils.popen_read("node -v").strip}"
+      else
+        opoo "No Node.js installation found. Installing via Homebrew..."
+        depends_on "node"
+      end
+      
       # Extract the package contents
       system "tar", "xf", cached_download, "-C", buildpath
       
@@ -41,7 +48,7 @@ class Envcli < Formula
         #!/bin/bash
         export NODE_PATH="#{libexec}/node_modules"
         export ENVCLI_CONFIG_DIR="#{var}/envcli"
-        exec "#{Formula["node@20"].opt_bin}/node" "#{libexec}/index.js" "$@"
+        exec "#{Formula["node"].opt_bin}/node" "#{libexec}/index.js" "$@"
       EOS
       
       # Make the bin stub executable
